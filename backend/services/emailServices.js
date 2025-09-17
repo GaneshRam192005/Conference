@@ -1,41 +1,51 @@
-const nodemailer = require('nodemailer');
-const dotenv = require('dotenv');
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
+
 dotenv.config();
 
-const sendApplyConfirmationEmail = async (email, name) => {
+export const sendApplyConfirmationEmail = async (email, name, userId, registrationId, paperTitle, allAuthors) => {
   const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     service: "Gmail",
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
     }
   });
+  // <h3 style="color: #2E86C1;">User ID: ${userId}</h3>
 
   const mailOptions = {
-    from: `"NEC Recruitment Team" <${process.env.EMAIL_USER}>`,
+    from: `"NEC Conference" <${process.env.EMAIL_USER}>`,
     to: email,
-    subject: "Application Confirmation - NEC Faculty Recruitment",
+    subject: "Conference Registration Confirmation",
     html: `
-      <div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">
-        <h2 style="color: #2E86C1;">Faculty Recruitment - Application Received</h2>
+      <div style="font-family: Arial, sans-serif; padding: 20px;">
+        <h2 style="color: #2E86C1;">Conference Registration Received</h2>
+        
+        <h1 style="color: #fbff00ff; background-color: #ff0000ff;text-align: center;">Registration ID: ${registrationId}</h1>
+        
+       
+        
         <p>Dear <strong>${name}</strong>,</p>
-        <p>Thank you for the interest. We have received your application successfully.</p>
-        <p>Our recruitment team will review your application and contact you soon. Please ensure that your registered email address remains active for future communications.</p>
-        <p>We appreciate your interest in joining NEC and wish you all the best in the recruitment process.</p>
-        <p>This is an auto-generated email. Kindly please do not reply to this message.</p>
+        <p>We have successfully received your paper submission. Your registration has been confirmed with the above Paper ID.</p>
+        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px;">
+          <h3 style="color: #2E86C1; margin-top: 0;">Paper Details:</h3>
+          <p><strong>Paper ID:</strong> ${registrationId}</p>
+          <p><strong>Paper Title:</strong> ${paperTitle}</p>
+          <p><strong>Created on:</strong> ${new Date().toLocaleDateString()}</p>
+          <p><strong>Authors:</strong> ${allAuthors.map(author => author.name).join(', ')}</p>
+          <p><strong>Submission Files:</strong> Abstract document attached</p>
+        </div>
+        <p>Our team will review it and contact you soon.</p>
         <br>
-        <p>Warm regards,</p>
-        <p><strong>National Engineering College</strong></p>
+        <p>Thanks</p>
+        <p><strong>ICoDSES Team</strong></p>
       </div>
-    `,
+    `
   };
 
-  try {
-    await transporter.sendMail(mailOptions);
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
-  }
+  // ✅ Only one sendMail call
+  await transporter.sendMail(mailOptions);
 };
-
-module.exports = { sendApplyConfirmationEmail };

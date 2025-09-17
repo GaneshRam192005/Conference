@@ -1,19 +1,14 @@
-const express = require('express');
+import express from "express";
+import multer from "multer";
+import { registerPaper, getAllRegistrations } from "../controllers/registrationController.js";
+import { authenticateToken } from "../middleware/auth.js";
+
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
-const { registerUser } = require('../controllers/registrationController');
+router.get('/all', authenticateToken, getAllRegistrations);
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
-const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-router.post('/', upload.single('abstract'), registerUser);
+router.post("/", authenticateToken, upload.single("abstract"), registerPaper);
 
-module.exports = router;
+export default router;
